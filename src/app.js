@@ -31,6 +31,7 @@ App = {
         });
       } catch (error) {
         // User denied account access...
+        console.log('Account access denied')
       }
     }
     // Legacy dapp browsers...
@@ -40,7 +41,13 @@ App = {
       // Acccounts always exposed
       web3.eth.sendTransaction({
         /* ... */
-      });
+        }, 
+        function(error, result) {
+            if (error.message.includes("User denied transaction signature")) {
+                // handle the "error" as a rejection
+            }
+        }
+      );
     }
     // Non-dapp browsers...
     else {
@@ -134,8 +141,25 @@ App = {
     const content = $('#newTask').val()
     console.log(content)
     console.log(App.todoList)
-    await App.todoList.createTask(content)
-    window.location.reload()
+    try {
+        await App.todoList.createTask(content)
+        window.location.reload()
+    }catch(err){
+        console.log(err)
+        App.setLoading(false)
+    }
+  },
+
+  toggleCompleted: async (e) => {
+    App.setLoading(true)
+    const taskId = e.target.name
+    try {
+        await App.todoList.toggleCompleted(taskId)
+        window.location.reload()
+    }catch(err){
+        console.log(err)
+        App.setLoading(false)
+    }
   },
 };
 
